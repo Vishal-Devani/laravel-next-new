@@ -16,7 +16,7 @@ export default function ProductsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">All Products</h1>
+      <h1 className="text-2xl font-bold mb-4">All Products test</h1>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {products.map((product: any) => (
           <Link
