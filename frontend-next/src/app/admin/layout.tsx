@@ -9,7 +9,7 @@ import useAdminAuth from "@/app/hooks/useAdminAuth";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAdminAuth();
-  if (loading) return <p>Loading...</p>;
+  if (loading) return; //<p>Loading...</p>;
   if (!user) return null; 
 
   return (
