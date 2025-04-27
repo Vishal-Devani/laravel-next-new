@@ -35,6 +35,6 @@ header {
 }
 
 #nprogress .bar {
-  background: #3b82f6; /* blue-500 */
-  height: 3px;
+  background: #3b82f6;
+  height: 4px;
 }

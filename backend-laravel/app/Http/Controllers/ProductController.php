@@ -62,7 +62,7 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::where('slug', $slug)->firstOrFail();
-        return $product;
+        return response()->json($product);
     }
 
     /**
@@ -76,9 +76,40 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $slug)
     {
-        //
+        $product = Product::where('slug', $slug)->firstOrFail();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'description' => 'nullable|string',
+            'image' => 'nullable|string',
+        ]);
+
+        // If name changed, regenerate slug
+        if ($product->name !== $request->name) {
+            $baseSlug = Str::slug($request->name);
+            $newSlug = $baseSlug;
+            $counter = 1;
+
+            while (Product::where('slug', $newSlug)->where('id', '!=', $product->id)->exists()) {
+                $newSlug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+
+            $product->slug = $newSlug;
+        }
+
+        $product->name = $request->name;
+        $product->description = $request->description;
+        $product->price = $request->price;
+        $product->stock = $request->stock;
+        $product->image = $request->image ?? $product->image;
+        $product->save();
+
+        return response()->json(['message' => 'Product updated successfully', 'product' => $product]);
     }
 
     /**
@@ -86,6 +117,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $product->delete();
+
+        return response()->json(['message' => 'Product deleted successfully']);
     }
 }
