@@ -69,6 +69,7 @@ export default function Header() {
             <ul className="flex space-x-4">
                 <li><Link href="/">Home</Link></li>
                 <li><Link href="/products">Shop</Link></li>
+                <li><Link href="/cart">Cart</Link></li>
                 {!user && (
                     <>
                         <li><Link href="/login">Login</Link></li>
