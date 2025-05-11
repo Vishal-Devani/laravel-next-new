@@ -25,6 +25,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/product" className="text-blue-600 hover:underline">Product</Link>
           </li>
           <li>
+            <Link href="/admin/orders" className="text-blue-600 hover:underline">Orders</Link>
+          </li>
+          <li>
             <Link href="/admin/profile" className="text-blue-600 hover:underline">Profile</Link>
           </li>
           <li>

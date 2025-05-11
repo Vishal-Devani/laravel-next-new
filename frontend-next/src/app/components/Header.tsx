@@ -76,9 +76,10 @@ export default function Header() {
                         <li><Link href="/register">Register</Link></li>
                     </>
                 )}
-
+                
                 {user && (
                     <>
+                        <li><Link href="/profile">Profile</Link></li>
                         <li className="cursor-pointer" onClick={handleLogout}>Logout</li>
                     </>
                 )}

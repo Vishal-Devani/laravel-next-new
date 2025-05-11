@@ -45,26 +45,81 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => Auth::user()]);
     }
 
-    public function update(Request $request)
-    {
-        $user = $request->user();
+    // public function update(Request $request)
+    // {
+    //     $user = $request->user();
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-        ]);
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|email|unique:users,email,' . $user->id,
+    //     ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+    //     $user->update([
+    //         'name' => $request->name,
+    //         'email' => $request->email,
+    //     ]);
 
-        return response()->json(['user' => $user]);
-    }
+    //     return response()->json(['user' => $user]);
+    // }
 
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
         return response()->json(['message' => 'Logged out']);
     }
+
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+
+        $billing = $user->addresses()->where('address_type', 'billing')->first();
+        $shipping = $user->addresses()->where('address_type', 'shipping')->first();
+
+        return response()->json([
+            'user' => $user,
+            'billing' => $billing,
+            'shipping' => $shipping,
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+    
+            'billing.address_line1' => 'required|string|max:255',
+            'billing.city' => 'required|string|max:100',
+            'billing.state' => 'required|string|max:100',
+            'billing.country' => 'required|string|max:100',
+            'billing.postal_code' => 'required|string|max:20',
+    
+            'shipping.address_line1' => 'required|string|max:255',
+            'shipping.city' => 'required|string|max:100',
+            'shipping.state' => 'required|string|max:100',
+            'shipping.country' => 'required|string|max:100',
+            'shipping.postal_code' => 'required|string|max:20',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'profile_update' => 1,
+        ]);
+
+        foreach (['billing', 'shipping'] as $type) {
+            if ($request->has($type)) {
+                $data = $request[$type];
+                $user->addresses()->updateOrCreate(
+                    ['address_type' => $type],
+                    array_merge($data, ['address_type' => $type])
+                );
+            }
+        }
+
+        return response()->json(['message' => 'Profile updated successfully']);
+    }
+
 }

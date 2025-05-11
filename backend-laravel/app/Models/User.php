@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'type',
+        'profile_update'
     ];
 
     /**
@@ -48,4 +49,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class);
+}
+
 }

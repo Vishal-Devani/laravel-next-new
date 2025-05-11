@@ -1,4 +1,3 @@
-// app/admin/product/create/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -14,6 +13,9 @@ export default function CreateProductPage() {
     stock: "",
   });
 
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [galleryImages, setGalleryImages] = useState<File[]>([]);
+
   const [errors, setErrors] = useState({
     name: "",
     description: "",
@@ -22,7 +24,7 @@ export default function CreateProductPage() {
   });
 
   const [serverError, setServerError] = useState("");
-  const onlyDigits = (str: string) => /^\d+(\.\d{1,2})?$/.test(str); 
+  const onlyDigits = (str: string) => /^\d+(\.\d{1,2})?$/.test(str);
 
   const validateField = (name: string, value: string) => {
     switch (name) {
@@ -49,11 +51,18 @@ export default function CreateProductPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleMainImageChange = (e: any) => {
+    setMainImage(e.target.files[0]);
+  };
+
+  const handleGalleryChange = (e: any) => {
+    setGalleryImages([...e.target.files]);
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setServerError("");
 
-    // Validate all fields before submit
     const newErrors: any = {};
     Object.keys(formData).forEach((key) => {
       const error = validateField(key, (formData as any)[key]);
@@ -64,15 +73,30 @@ export default function CreateProductPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return; // stop submission if validation errors
+      return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
+    const payload = new FormData();
 
-      await API.post("/products", formData, {
+    payload.append("name", formData.name);
+    payload.append("description", formData.description);
+    payload.append("price", formData.price);
+    payload.append("stock", formData.stock);
+
+    if (mainImage) {
+      payload.append("image", mainImage);
+    }
+
+    galleryImages.forEach((file, index) => {
+      payload.append(`gallery[]`, file);
+    });
+
+    try {
+      await API.post("/products", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -100,7 +124,7 @@ export default function CreateProductPage() {
             placeholder="Product Name"
             onChange={handleChange}
             value={formData.name}
-            className={`w-full border p-2 rounded ${errors.price ? "border-red-500" : "border-gray-300"}`}
+            className={`w-full border p-2 rounded ${errors.name ? "border-red-500" : "border-gray-300"}`}
           />
           {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
@@ -135,9 +159,19 @@ export default function CreateProductPage() {
             placeholder="Stock"
             onChange={handleChange}
             value={formData.stock}
-            className={`w-full border p-2 rounded ${errors.price ? "border-red-500" : "border-gray-300"}`}
+            className={`w-full border p-2 rounded ${errors.stock ? "border-red-500" : "border-gray-300"}`}
           />
           {errors.stock && <p className="text-red-500 text-sm">{errors.stock}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Main Image</label>
+          <input type="file" accept="image/*" onChange={handleMainImageChange} />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Gallery Images</label>
+          <input type="file" accept="image/*" multiple onChange={handleGalleryChange} />
         </div>
 
         <button
@@ -146,8 +180,7 @@ export default function CreateProductPage() {
         >
           Save Product
         </button>
-        </form>
-
+      </form>
     </div>
   );
 }
